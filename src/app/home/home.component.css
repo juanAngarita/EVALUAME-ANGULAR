@@ -1,0 +1,45 @@
+table {
+    width: 50%;
+    max-height:300px;
+}
+
+th {
+    text-align: center;
+    color: white;
+    padding: 10px;
+}
+
+td {
+    text-align: center;
+}
+
+.contenedor {
+    display: flex;
+    flex-direction: row;
+    margin: 20px;
+}
+
+table {
+    table-layout: fixed;
+    width: your_size px;
+}
+
+#opcional {
+    width: 50%;
+}
+
+h2 {
+    text-align: center;
+}
+
+#calificar{
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+    width: 50%;
+}
+
+#btnSiguiente{
+    width: 120px;
+    align-self: flex-end;
+}

@@ -1,0 +1,7 @@
+<div class="contenedor">
+    <canvas #canvas width="640" height="480"></canvas>
+    <video #video playsinline autoplay hidden></video>
+
+    <button [disabled]="desactivarBoton" type="button" class="btn btn-primary" (click)="cambiarEstado($event.target)">INICIAR EVALUACIÓN</button>
+    <app-tabla-intentos [escala]="escala"></app-tabla-intentos>
+</div>

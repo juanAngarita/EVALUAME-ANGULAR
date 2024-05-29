@@ -1,0 +1,8 @@
+.componente{
+    display: flex;
+    flex-direction: row;
+}
+
+app-camara-capture, app-escala-detalle{
+    margin: 10px;
+}

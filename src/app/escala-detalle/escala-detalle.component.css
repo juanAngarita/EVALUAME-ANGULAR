@@ -1,0 +1,22 @@
+p{
+    font-size: 20px;
+}
+h3{
+    text-align: center;
+}
+img{
+    width: 110px;
+}
+
+td, th{
+    text-align: center;
+    border: black solid 1px;
+}
+
+#titulo{
+    font-size: larger;
+}
+
+table{
+    border: black solid 1px;
+}
