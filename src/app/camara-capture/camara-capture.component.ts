@@ -307,10 +307,12 @@ export class CamaraCaptureComponent implements AfterViewInit {
       }
 
       if (this.estado) {
-        //console.log('FILA:', fila);
+        console.log('FILA:', fila);
 
         let predict_data = this.landmarks_to_embedding(fila);
-
+        predict_data.array().then((array) => {
+          console.log(array);
+        });
         // Crear un tensor con el valor adicional que deseas agregar
         let additional_value = tf.tensor([[this.escala!.id]]); // 'valor' es el valor que deseas agregar
 
@@ -320,6 +322,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
         console.log('PREDICT DATA:', predict_data);
 
         let puntaje = this.predecir(predict_data);
+        console.log('PUNTAJEe:', puntaje);
 
         if (puntaje == 0) {
           this.colorEsqueleto = 'rgb(255, 0, 0)';
@@ -409,10 +412,11 @@ export class CamaraCaptureComponent implements AfterViewInit {
 
   predecir(processedInput: any) {
     const classification = this.poseClassifier.predict(processedInput);
+    console.log('CLASIFICACION:', classification);
 
     // Get the value
     const value = classification.argMax(-1).dataSync()[0];
-
+    console.log('CLASIFICACION:', value);
     // Arreglo proporcionado
     var arreglo = [
       '110',
