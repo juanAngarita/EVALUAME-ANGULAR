@@ -100,6 +100,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
   //INPUT -> ID DEL ÍTEM
   @Input()
   id: number = 0;
+  //objeto con la información de la escala
   escala: Escala | null = null;
 
   //Elementos para la captura de movimiento
@@ -110,7 +111,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
   //ELEMENTOS ESTIMACIÓN DE POSE
   estado: boolean = false; //SI SE ESTÁ GRABANDO
   poses: any;
-  puntaje: number = 3;
+  puntaje: number = 0;
   desactivarBoton: boolean = false;
   colorEsqueleto: string = 'rgb(255, 255, 255)';
 
@@ -128,11 +129,8 @@ export class CamaraCaptureComponent implements AfterViewInit {
   }
 
   ngOnInit() {
-    console.log('Funcion init');
-    //!!!CAMBIAR ACÁ EL TIPO DE MODELO!!!
-    //1. SINGLEPOSE_LIGHTNING (MoveNet)
-    //2. SINGLEPOSE_THUNDER (MoveNet)
-    this.runMovenet();
+    console.log('Funcion ngOnInit');
+    this.runPoseEstimation();
   }
 
   //OBTENER LOS ELEMENTOS DEL HTML + INICIALIZAR LA CAMARA
@@ -142,7 +140,9 @@ export class CamaraCaptureComponent implements AfterViewInit {
     this.video!.height = 480;
     this.canvas = this.canvasElement.nativeElement;
     this.ctx = this.canvas.getContext('2d')!;
+    //Inicializar la camata
     this.initCamera();
+    //Inicializar el modelo de clasificación
     this.cargarModel();
   }
 
@@ -194,15 +194,16 @@ export class CamaraCaptureComponent implements AfterViewInit {
   //CARGAR EL MODELO DE CLASIFIFCACION
   async cargarModel() {
     console.log('Cargando modelo...');
-
+    //Esperar que tensorflow esté listo
     await tf.ready();
-
-    this.poseClassifier = await tf.loadLayersModel('/assets/models/model.json');
-    console.log('Clasificacion de pose :', this.poseClassifier);
-    console.log(this.poseClassifier.model);
+    //Cargar el modelo
+    this.poseClassifier = await tf.loadLayersModel(
+      `/assets/models/${this.id}/model.json`
+    );
+    console.log('Modelo de clasificación: ', this.poseClassifier.model);
   }
 
-  async runMovenet() {
+  async runPoseEstimation() {
     //Esperar a que tf esté listo
     await tf.ready();
     //Crear el detector de pose
@@ -212,14 +213,13 @@ export class CamaraCaptureComponent implements AfterViewInit {
       { runtime: 'tfjs', modelType: 'heavy' }
     );
     //obtener las poses
-    //console.log(detector);
     setInterval(() => this.getPoses(detector), 100);
   }
 
   async getPoses(detector: poseDetection.PoseDetector) {
     if (detector && this.video) {
       this.poses = await detector.estimatePoses(this.video);
-      console.log(this.poses);
+      //console.log(this.poses);
       this.drawPoses(this.poses);
     }
   }
@@ -310,16 +310,11 @@ export class CamaraCaptureComponent implements AfterViewInit {
         console.log('FILA:', fila);
 
         let predict_data = this.landmarks_to_embedding(fila);
-        predict_data.array().then((array) => {
-          console.log(array);
-        });
-        // Crear un tensor con el valor adicional que deseas agregar
-        let additional_value = tf.tensor([[this.escala!.id]]); // 'valor' es el valor que deseas agregar
+        //Imprimir los valores de la prediccion
 
-        // Concatenar el nuevo valor al final de predict_data
-        predict_data = tf.concat([predict_data, additional_value], 1);
-
-        console.log('PREDICT DATA:', predict_data);
+        //predict_data.array().then((array) => {
+        //  console.log(array);
+        //});
 
         let puntaje = this.predecir(predict_data);
         console.log('PUNTAJEe:', puntaje);
@@ -410,55 +405,15 @@ export class CamaraCaptureComponent implements AfterViewInit {
   //////////
   //FIN PROCESAMIENTO DE DATOS
 
-  predecir(processedInput: any) {
+  //Predecir a partir de un conjunto de entrada
+  predecir(processedInput: any): number {
     const classification = this.poseClassifier.predict(processedInput);
-    console.log('CLASIFICACION:', classification);
 
-    // Get the value
+    // Obtener la predicción con mejores resultados
     const value = classification.argMax(-1).dataSync()[0];
     console.log('CLASIFICACION:', value);
-    // Arreglo proporcionado
-    var arreglo = [
-      '110',
-      '111',
-      '112',
-      '150',
-      '151',
-      '152',
-      '160',
-      '161',
-      '162',
-      '170',
-      '171',
-      '172',
-      '210',
-      '211',
-      '212',
-      '300',
-      '301',
-      '302',
-    ];
 
-    // Crear un diccionario donde la clave sea una secuencia de números que comience en 0
-    var diccionario: { [key: string]: string } = {};
-
-    // Llenar el diccionario
-    for (var i = 0; i < arreglo.length; i++) {
-      diccionario[i.toString()] = arreglo[i];
-    }
-
-    // Convertir el número en una cadena
-    var numeroStr = diccionario[value].toString();
-
-    // Obtener los dos primeros dígitos
-    var dosPrimerosDigitos = parseInt(numeroStr.substring(0, 2));
-
-    // Obtener el último dígito
-    var ultimoDigito = parseInt(numeroStr.substring(2));
-
-    console.log('PRUEBA', dosPrimerosDigitos);
-    console.log('PREDICCION', ultimoDigito);
-    return ultimoDigito;
+    return value;
   }
 
   //PINTA 1 PUNTO CLAVE

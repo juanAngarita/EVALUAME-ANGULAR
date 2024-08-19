@@ -12,7 +12,7 @@ export class EscalaService {
       id: 3,
       posicionInicial:
         'Sentado en borde de camilla o silla (pies sin apoyar) o en camilla/suelo (piesapoyados). Sin silla de ruedas. Sin apoyar la espalda.',
-      descripcion: '1.UNA MANO A LA CABEZA SENTADO',
+      descripcion: '3. UNA MANO A LA CABEZA SENTADO',
       intentos: 0,
       puntajeMaximo: 0,
       detalles: {
@@ -26,10 +26,10 @@ export class EscalaService {
       puntajes: [0, 0, 0],
     },
     {
-      id: 4,
+      id: 11,
       posicionInicial:
         'En decúbito prono, brazos a los lados (ver ítem 6) (pelvis en contacto con elsuelo).',
-      descripcion: '2.Se apoya sobre los brazos extendidos',
+      descripcion: '11. Se apoya sobre los brazos extendidos',
       intentos: 0,
       puntajeMaximo: 0,
       detalles: {
@@ -44,10 +44,10 @@ export class EscalaService {
       puntajes: [0, 0, 0],
     },
     {
-      id: 5,
+      id: 17,
       posicionInicial:
         'En decúbito prono, brazos a los lados (ver ítem 6). Frente apoyada en elsuelo.',
-      descripcion: 'Ítem 12:Levanta la cabeza desde decúbito prono',
+      descripcion: '17. Levanta la cabeza desde decúbito prono',
       intentos: 0,
       puntajeMaximo: 0,
       detalles: {
@@ -62,10 +62,10 @@ export class EscalaService {
       puntajes: [0, 0, 0],
     },
     {
-      id: 6,
+      id: 21,
       posicionInicial:
         'En supino, con caderas y rodillas en extensión máxima posible.',
-      descripcion: 'Ítem 21:Flexión de cadera derecha en supino',
+      descripcion: '21. Flexión de cadera derecha en supino',
       intentos: 0,
       puntajeMaximo: 0,
       detalles: {
@@ -79,10 +79,10 @@ export class EscalaService {
       puntajes: [0, 0, 0],
     },
     {
-      id: 7,
+      id: 15,
       posicionInicial:
         'En decúbito prono, brazos en posición media o a los lados',
-      descripcion: 'Ítem 15: Cuadrupedia',
+      descripcion: '15. Cuadrupedia',
       intentos: 0,
       puntajeMaximo: 0,
       detalles: {
@@ -102,7 +102,8 @@ export class EscalaService {
   }
 
   findById(id: number) {
-    return this.escalas[id - 1];
+    //Buscar la escala por el indice
+    return this.escalas.find((escala) => escala.id == id)!;
   }
 
   actualizarPuntaje(idEscala: number, puntaje: number) {
