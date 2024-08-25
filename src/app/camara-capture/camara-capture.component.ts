@@ -198,7 +198,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
     await tf.ready();
     //Cargar el modelo
     this.poseClassifier = await tf.loadLayersModel(
-      `/assets/models/${this.id}/model.json`
+      `/assets/models/continue/${this.id}/model.json`
     );
     console.log('Modelo de clasificación: ', this.poseClassifier.model);
   }
@@ -319,6 +319,15 @@ export class CamaraCaptureComponent implements AfterViewInit {
         let puntaje = this.predecir(predict_data);
         console.log('PUNTAJEe:', puntaje);
 
+        if (puntaje >= 0 && puntaje < 0.5) {
+          this.colorEsqueleto = 'rgb(255, 0, 0)';
+        } else if (puntaje >= 0.5 && puntaje < 1.5) {
+          this.colorEsqueleto = 'rgb(255, 255, 0)';
+        } else if (puntaje >= 1.5) {
+          this.colorEsqueleto = 'rgb(0, 255, 0)';
+        }
+
+        /*
         if (puntaje == 0) {
           this.colorEsqueleto = 'rgb(255, 0, 0)';
         } else if (puntaje == 1) {
@@ -326,6 +335,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
         } else if (puntaje == 2) {
           this.colorEsqueleto = 'rgb(0, 255, 0)';
         }
+        */
       }
     }
   }
@@ -410,9 +420,10 @@ export class CamaraCaptureComponent implements AfterViewInit {
     const classification = this.poseClassifier.predict(processedInput);
 
     // Obtener la predicción con mejores resultados
-    const value = classification.argMax(-1).dataSync()[0];
-    console.log('CLASIFICACION:', value);
-
+    //const value = classification.argMax(-1).dataSync()[0];
+    // console.log('CLASIFICACION:', value);
+    const value = classification.dataSync()[0];
+    //return value;
     return value;
   }
 
