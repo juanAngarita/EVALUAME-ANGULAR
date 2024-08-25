@@ -1,22 +1,25 @@
-p{
-    font-size: 20px;
+p {
+  font-size: 1.5rem;
 }
-h3{
-    text-align: center;
+h3 {
+  text-align: center;
+  padding-top: 6px;
 }
-img{
-    width: 110px;
-}
-
-td, th{
-    text-align: center;
-    border: black solid 1px;
+img {
+  width: 110px;
 }
 
-#titulo{
-    font-size: larger;
+td,
+th {
+  text-align: center;
+  border: black solid 1px;
+  font-size: 1.3rem;
 }
 
-table{
-    border: black solid 1px;
+#titulo {
+  font-size: 1.4rem;
+}
+
+table {
+  border: black solid 1px;
 }

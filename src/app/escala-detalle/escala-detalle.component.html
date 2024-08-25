@@ -1,39 +1,38 @@
-<h3>{{escala?.descripcion}}</h3>
-<p> <strong>Instrucciones:</strong> {{escala?.detalles?.instrucciones}}</p>
-<p> <strong>Posición inicial:</strong> {{escala?.posicionInicial}}</p>
-
+<h3>{{ escala?.descripcion }}</h3>
+<p><strong>Instrucciones:</strong> {{ escala?.detalles?.instrucciones }}</p>
+<p><strong>Posición inicial:</strong> {{ escala?.posicionInicial }}</p>
 
 <table class="table">
+  <tr>
+    <th id="titulo" colspan="3">Puntajes</th>
+  </tr>
+  <tr>
+    <th>1</th>
+    <th>2</th>
+    <th>3</th>
+  </tr>
+  <tbody>
     <tr>
-        <th id="titulo"colspan="3">Puntajes</th>
+      <td class="align-middle">
+        {{ escala?.detalles?.puntaje0 }}
+      </td>
+      <td class="align-middle">
+        {{ escala?.detalles?.puntaje1 }}
+      </td>
+      <td class="align-middle">
+        {{ escala?.detalles?.puntaje2 }}
+      </td>
     </tr>
     <tr>
-        <th>1</th>
-        <th>2</th>
-        <th>3</th>
+      <td>
+        <img src="{{ escala?.detalles?.imagen0 }}" alt="Imagen no disponible" />
+      </td>
+      <td>
+        <img src="{{ escala?.detalles?.imagen1 }}" />
+      </td>
+      <td>
+        <img src="{{ escala?.detalles?.imagen2 }}" />
+      </td>
     </tr>
-    <tbody>
-        <tr>
-            <td>
-                {{escala?.detalles?.puntaje0}}
-            </td>
-            <td>
-                {{escala?.detalles?.puntaje1}}
-            </td>
-            <td>
-                {{escala?.detalles?.puntaje2}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <img src={{escala?.detalles?.imagen0}} alt="Imagen no disponible">
-            </td>
-            <td>
-                <img src={{escala?.detalles?.imagen1}}>
-            </td>
-            <td>
-                <img src={{escala?.detalles?.imagen2}}>
-            </td>
-        </tr>
-    </tbody>
+  </tbody>
 </table>

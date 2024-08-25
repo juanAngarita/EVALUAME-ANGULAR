@@ -11,7 +11,7 @@ export class EscalaService {
     {
       id: 3,
       posicionInicial:
-        'Sentado en borde de camilla o silla (pies sin apoyar) o en camilla/suelo (piesapoyados). Sin silla de ruedas. Sin apoyar la espalda.',
+        'Sentado en borde de camilla o silla (pies sin apoyar) o en camilla/suelo (pies apoyados). Sin silla de ruedas. Sin apoyar la espalda.',
       descripcion: '3. UNA MANO A LA CABEZA SENTADO',
       intentos: 0,
       puntajeMaximo: 0,
@@ -35,9 +35,9 @@ export class EscalaService {
       detalles: {
         puntaje0: 'Incapaz',
         puntaje1:
-          'Puede apoyarsesobre los brazosextendidos durante3’’ si se le coloca.',
+          'Puede apoyarse sobre los brazos extendidos durante 3 segundos si se le coloca.',
         puntaje2:
-          'Capaz de apoyarsesobre los brazosextendidos, con lacabeza en altodurante 3',
+          'Capaz de apoyarse sobre los brazos extendidos, con la cabeza en alto durante 3',
         instrucciones:
           '¿puedes llevar una mano a tu cabeza sin flexionar tu cuello?',
       },
@@ -53,9 +53,9 @@ export class EscalaService {
       detalles: {
         puntaje0: 'Incapaz.',
         puntaje1:
-          'Levanta la cabezacon los brazos haciael frente durante 3’’. ',
+          'Levanta la cabezacon los brazos hacia el frente durante 3 segundos. ',
         puntaje2:
-          'Capaz de levantar lacabeza en decúbitoprono con los brazosa los lados durante3’’.',
+          'Capaz de levantar la cabeza en decúbito prono con los brazos a los lados durante 3 segundos.',
         instrucciones:
           '¿Puedes levantar la cabeza manteniendo los brazos a los lados durante 3 segundos?',
       },

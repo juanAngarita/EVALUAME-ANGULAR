@@ -11,6 +11,10 @@ import { EscalaDetalleComponent } from './escala-detalle/escala-detalle.componen
 import { EvaluarComponent } from './pages/evaluar/evaluar.component';
 import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 import { TablaIntentosComponent } from './tabla-intentos/tabla-intentos.component';
+import { CamaraCaptureContinueComponent } from './camara-capture-continue/camara-capture-continue.component';
+
+import { FormsModule } from '@angular/forms';
+import { ConfirmationDialogService } from './services/confirmation-dialog.service';
 
 @NgModule({
   declarations: [
@@ -21,14 +25,11 @@ import { TablaIntentosComponent } from './tabla-intentos/tabla-intentos.componen
     EscalaDetalleComponent,
     EvaluarComponent,
     ConfirmationDialogComponent,
-    TablaIntentosComponent
+    TablaIntentosComponent,
+    CamaraCaptureContinueComponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    NgbModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+  imports: [BrowserModule, AppRoutingModule, NgbModule, FormsModule],
+  providers: [ConfirmationDialogService],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

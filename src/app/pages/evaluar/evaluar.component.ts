@@ -1,25 +1,31 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, UrlSegment } from '@angular/router';
 
 @Component({
   selector: 'app-evaluar',
   templateUrl: './evaluar.component.html',
-  styleUrls: ['./evaluar.component.css']
+  styleUrls: ['./evaluar.component.css'],
 })
-export class EvaluarComponent implements OnInit{
+export class EvaluarComponent implements OnInit {
+  constructor(private route: ActivatedRoute) {}
 
-  constructor(
-    private route:ActivatedRoute
-  ){}
+  id: number = 0;
+  evaluacionContinua: boolean = true;
 
-  id:number = 0;
+  ngOnInit() {
+    this.route.url.subscribe((segments: UrlSegment[]) => {
+      const isContinuaRoute = segments.some(
+        (segment) => segment.path === 'continua'
+      );
+      this.evaluacionContinua = isContinuaRoute;
 
-  ngOnInit(){
+      console.log('Es ruta continua:', this.evaluacionContinua);
+    });
+
     this.route.params.subscribe((params: Params) => {
-      console.log("Params",params)
-      this.id= params['id'];
-      console.log("ID" + this.id)
+      console.log('Params', params);
+      this.id = params['id'];
+      console.log('ID' + this.id);
     });
   }
-
 }

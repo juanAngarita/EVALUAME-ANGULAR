@@ -7,17 +7,16 @@ import {
 } from '@angular/core';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import * as tf from '@tensorflow/tfjs';
+import * as backend from '@tensorflow/tfjs-backend-webgpu';
 import { ConfirmationDialogService } from '../services/confirmation-dialog.service';
 import { Escala } from '../model/Escala';
 import { EscalaService } from '../services/escala.service';
-
 @Component({
-  providers: [ConfirmationDialogService],
-  selector: 'app-camara-capture',
-  templateUrl: './camara-capture.component.html',
-  styleUrls: ['./camara-capture.component.css'],
+  selector: 'app-camara-capture-continue',
+  templateUrl: './camara-capture-continue.component.html',
+  styleUrls: ['./camara-capture-continue.component.css'],
 })
-export class CamaraCaptureComponent implements AfterViewInit {
+export class CamaraCaptureContinueComponent {
   //DICCIONATIO DE PUNTOS CLAVE
   PUNTOS: { [key: string]: number } = {
     NOSE: 0,
@@ -185,21 +184,21 @@ export class CamaraCaptureComponent implements AfterViewInit {
       //EN CASO DE QUE SE HAYA LLEGADO AL MÁXIMO DE INTENTOS
       if (this.escala.intentos == 3) {
         this.desactivarBoton = true;
-        console.log('NO HAY MAS INTENTOS DISPONIBLES');
+        console.log('apagando boton');
       }
     }
   }
 
   //CARGAR EL MODELO DE CLASIFIFCACION
   async cargarModel() {
-    console.log('Cargando modelo discretos...');
+    console.log('Cargando modelo continuo...');
     //Esperar que tensorflow esté listo
     await tf.ready();
     //Cargar el modelo
     this.poseClassifier = await tf.loadLayersModel(
-      `/assets/models/${this.id}/model.json`
+      `/assets/models/continue/${this.id}/model.json`
     );
-    console.log('MODELO RN CARGADO');
+    console.log('Modelo de clasificación: ', this.poseClassifier.model);
   }
 
   async runPoseEstimation() {
@@ -218,9 +217,8 @@ export class CamaraCaptureComponent implements AfterViewInit {
   async getPoses(detector: poseDetection.PoseDetector) {
     if (detector && this.video) {
       this.poses = await detector.estimatePoses(this.video);
-      if (this.poses.length > 0) {
-        this.drawPoses(this.poses);
-      }
+      //console.log(this.poses);
+      this.drawPoses(this.poses);
     }
   }
 
@@ -262,7 +260,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
       this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
     //RENDERIZADO DE LAS POSES
-    if (this.poses && this.poses.length > 0) {
+    if (this.poses) {
       this.drawPoses(this.poses);
     }
   }

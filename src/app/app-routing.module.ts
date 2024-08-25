@@ -5,14 +5,14 @@ import { CamaraCaptureComponent } from './camara-capture/camara-capture.componen
 import { EvaluarComponent } from './pages/evaluar/evaluar.component';
 
 const routes: Routes = [
-  
   { path: 'home', component: HomeComponent },
   { path: 'evaluar/:id', component: EvaluarComponent },
-  { path: '', component: HomeComponent }
+  { path: 'evaluar/continua/:id', component: EvaluarComponent },
+  { path: '', component: HomeComponent },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

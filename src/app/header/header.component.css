@@ -1,10 +1,19 @@
-div{
-    background-color: #2A5392;
-    padding: 10px;
+div {
+  background-color: #2a5392;
+  padding-bottom: 5px;
 }
 
-h1{
-    color: white;
-    text-align: center;
-    margin: 0;
+h1 {
+  color: white;
+  text-align: center;
+  margin: 0;
+  font-size: 4rem;
+  font-family: "Patrick Hand", cursive;
+}
+
+h2 {
+  color: white;
+  text-align: center;
+  margin: 0;
+  font-size: 1.7rem;
 }

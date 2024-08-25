@@ -1,45 +1,58 @@
 <div class="contenedor">
-    <table class="table rounded-3 overflow-hidden">
-        <thead class="bg-primary">
-            <th scope="col">
-                PRUEBA
-            </th>
-            <th scope="col">
-                PUNTAJE MÁXIMO
-            </th>
-            <th scope="col">
-                INTENTOS
-            </th>
-            <th scope="col">
-                ACCIONES
-            </th>
-        </thead>
-        <tbody>
-            <tr *ngFor="let escala of escalas">
-                <td>
-                    {{escala.descripcion | uppercase}} 
-                </td>
-                <td>
-                    {{escala.puntajeMaximo}}
-                </td>
-                <td>
-                    {{escala.intentos}}
-                </td>
-                <td>
-                    <button   (click)="seleccionar(escala.id)" type="button" class="btn btn-primary">
-                        SELECCIONAR
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <div *ngIf="idSeleccionado!=0" id="calificar">
-        <app-escala-detalle  [id]="idSeleccionado"></app-escala-detalle>
-        <button id="btnSiguiente" type="button" class="btn btn-primary" (click)="redirigir()">Evaluar</button>
+  <table class="table rounded-3 overflow-hidden">
+    <thead class="bg-primary">
+      <th scope="col">PRUEBA</th>
+      <th scope="col">PUNTAJE MÁXIMO</th>
+      <th scope="col">INTENTOS</th>
+      <th scope="col">ACCIONES</th>
+    </thead>
+    <tbody>
+      <tr *ngFor="let escala of escalas">
+        <td class="align-middle">
+          {{ escala.descripcion | uppercase }}
+        </td>
+        <td class="align-middle">
+          {{ escala.puntajeMaximo }}
+        </td>
+        <td class="align-middle">
+          {{ escala.intentos }}
+        </td>
+        <td class="align-middle">
+          <button
+            (click)="seleccionar(escala.id)"
+            type="button"
+            class="btn btn-primary"
+          >
+            SELECCIONAR
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div *ngIf="idSeleccionado != 0" id="calificar">
+    <app-escala-detalle [id]="idSeleccionado"></app-escala-detalle>
+    <button
+      id="btnSiguiente"
+      type="button"
+      class="btn btn-primary"
+      (click)="redirigir()"
+    >
+      Evaluar
+    </button>
+    <!-- Agregar el checkbox para el modo de escala continua -->
+    <div class="form-check mt-3" id="chk-escalaContinua">
+      <label class="form-check-label" for="escalaContinuaCheckbox">
+        Trabajar en modo escala continua
+      </label>
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="escalaContinuaCheckbox"
+        [(ngModel)]="modoEscalaContinua"
+      />
     </div>
-
-    <div id="opcional" *ngIf="idSeleccionado==0">
-        <h2>Seleccione un ítem</h2>
-    </div>
-
+  </div>
+  <div id="opcional" *ngIf="idSeleccionado == 0">
+    <h2>Seleccione un ítem</h2>
+  </div>
 </div>

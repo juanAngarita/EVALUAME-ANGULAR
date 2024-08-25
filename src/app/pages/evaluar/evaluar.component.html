@@ -1,4 +1,9 @@
 <div class="componente">
+  <ng-container *ngIf="!evaluacionContinua">
     <app-camara-capture [id]="id"></app-camara-capture>
-    <app-escala-detalle [id]="id"></app-escala-detalle>
+  </ng-container>
+  <ng-container *ngIf="evaluacionContinua">
+    <app-camara-capture-continue [id]="id"></app-camara-capture-continue>
+  </ng-container>
+  <app-escala-detalle [id]="id"></app-escala-detalle>
 </div>

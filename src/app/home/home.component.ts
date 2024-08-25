@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Escala } from '../model/Escala';
 import { EscalaService } from '../services/escala.service';
 import { Router } from '@angular/router';
@@ -6,29 +6,29 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-
-
-  constructor(
-    private escalaService: EscalaService,
-    private router: Router
-  ){}
+  constructor(private escalaService: EscalaService, private router: Router) {}
+  //Checkbox
+  modoEscalaContinua = false;
 
   redirigir() {
-    this.router.navigate(['/evaluar/' + this.idSeleccionado]);
+    if (!this.modoEscalaContinua) {
+      this.router.navigate(['/evaluar/' + this.idSeleccionado]);
+    } else {
+      this.router.navigate(['/evaluar/continua/' + this.idSeleccionado]);
+    }
   }
 
   idSeleccionado: number = 0;
-
   escalas: Escala[] = [];
-  ngOnInit(){
+  ngOnInit() {
     this.escalas = this.escalaService.findAll();
   }
 
-  seleccionar(id:number){
-    console.log(id)
+  seleccionar(id: number) {
+    console.log('Item seleccionado: ', id);
     this.idSeleccionado = id;
   }
 }

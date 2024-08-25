@@ -1,45 +1,58 @@
 table {
-    width: 50%;
-    max-height:300px;
+  width: 50%;
+  max-height: 300px;
+}
+
+button {
+  background-color: #2a5392;
+  border: #2a5392;
 }
 
 th {
-    text-align: center;
-    color: white;
-    padding: 10px;
+  text-align: center;
+  color: white;
+  padding: 10px;
+  background-color: #2a5392;
+  font-size: 1.1rem;
 }
 
 td {
-    text-align: center;
+  text-align: center;
+  font-size: 1.1rem;
 }
 
 .contenedor {
-    display: flex;
-    flex-direction: row;
-    margin: 20px;
+  display: flex;
+  flex-direction: row;
+  margin: 20px;
 }
 
 table {
-    table-layout: fixed;
-    width: your_size px;
+  table-layout: fixed;
+  width: your_size px;
 }
 
 #opcional {
-    width: 50%;
+  width: 50%;
 }
 
 h2 {
-    text-align: center;
+  text-align: center;
 }
 
-#calificar{
-    display: flex;
-    flex-direction: column;
-    margin-left: 10px;
-    width: 50%;
+#calificar {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  width: 50%;
 }
 
-#btnSiguiente{
-    width: 120px;
-    align-self: flex-end;
+#btnSiguiente {
+  width: 120px;
+  align-self: flex-end;
+  font-size: 1.5rem;
+}
+#chk-escalaContinua {
+  font-size: 1.5rem;
+  align-self: flex-end;
 }

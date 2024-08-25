@@ -21,12 +21,8 @@ export class EscalaDetalleComponent {
 
   ngOnChanges() {
     this.escala = this.escalaService.findById(this.id);
-    console.log(this.id);
-    console.log(this.escala);
     this.escala!.detalles!.imagen0 = 'assets/images/item' + this.id + '-0.png';
     this.escala!.detalles!.imagen1 = 'assets/images/item' + this.id + '-1.png';
     this.escala!.detalles!.imagen2 = 'assets/images/item' + this.id + '-2.png';
-    console.log(this.escala!.detalles?.imagen0);
-    console.log('AYUDAAAA', this.escala);
   }
 }
