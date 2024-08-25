@@ -1,7 +1,14 @@
-table{
-    width: 300px;
+table {
+  width: 400px;
 }
 
-td, th{
-    text-align: center;
+td,
+th {
+  text-align: center;
+}
+th {
+  background-color: #2a5392;
+  color: white;
+  padding: 8px;
+  font-size: 1.2rem;
 }

@@ -117,6 +117,12 @@ export class CamaraCaptureComponent implements AfterViewInit {
   //ESTIMACIÓN DE POSE Y MODELOS
   poseClassifier: any;
 
+  mensajeAlerta: string = '';
+
+  promedioConfianza: number = 0;
+
+  mejorPuntaje: number = 0;
+  ultimosPuntajes: number[] = [];
   constructor(
     private confirmationDialogService: ConfirmationDialogService,
     private escalaService: EscalaService
@@ -164,7 +170,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
     this.confirmationDialogService
       .confirm(
         'Confirmar el puntaje',
-        'El puntaje calculado es: ' + this.puntaje,
+        'El puntaje calculado es: ' + this.mejorPuntaje,
         'Aceptar',
         'Cancelar'
       )
@@ -178,9 +184,9 @@ export class CamaraCaptureComponent implements AfterViewInit {
   //ACTUALIZA EL PUNTAJE TANTO EN EL SERVICIO COMO EN EL FRONT
   actualizarPuntajes() {
     if (this.escala) {
-      this.escalaService.actualizarPuntaje(this.escala.id, this.puntaje);
+      this.escalaService.actualizarPuntaje(this.escala.id, this.mejorPuntaje);
       let intentos = this.escala.intentos;
-      this.escala.puntajes[intentos] = this.puntaje;
+      this.escala.puntajes[intentos] = this.mejorPuntaje;
       this.escala.intentos++;
       //EN CASO DE QUE SE HAYA LLEGADO AL MÁXIMO DE INTENTOS
       if (this.escala.intentos == 3) {
@@ -188,6 +194,8 @@ export class CamaraCaptureComponent implements AfterViewInit {
         console.log('NO HAY MAS INTENTOS DISPONIBLES');
       }
     }
+    this.mejorPuntaje = 0;
+    this.ultimosPuntajes = [];
   }
 
   //CARGAR EL MODELO DE CLASIFIFCACION
@@ -218,9 +226,6 @@ export class CamaraCaptureComponent implements AfterViewInit {
   async getPoses(detector: poseDetection.PoseDetector) {
     if (detector && this.video) {
       this.poses = await detector.estimatePoses(this.video);
-      if (this.poses.length > 0) {
-        this.drawPoses(this.poses);
-      }
     }
   }
 
@@ -263,7 +268,23 @@ export class CamaraCaptureComponent implements AfterViewInit {
     }
     //RENDERIZADO DE LAS POSES
     if (this.poses && this.poses.length > 0) {
+      let counter: number = 0.0;
+      for (let i = 0; i < this.poses[0].keypoints.length; i++) {
+        counter += Number(this.poses[0].keypoints[i].score.toFixed(2));
+      }
+
+      this.promedioConfianza = counter / this.poses[0].keypoints.length;
+      this.promedioConfianza = Number(this.promedioConfianza.toFixed(2));
       this.drawPoses(this.poses);
+      if (this.promedioConfianza < 0.6) {
+        this.mensajeAlerta =
+          'No se reconoce ninguna pose con confianza suficiente';
+      } else {
+        this.mensajeAlerta = '';
+      }
+    } else {
+      this.mensajeAlerta = 'No se reconocen personas en la escena';
+      this.promedioConfianza = 0.0;
     }
   }
 
@@ -274,8 +295,6 @@ export class CamaraCaptureComponent implements AfterViewInit {
     //Si ya hay poses detectadas
     if (pose) {
       let fila = [];
-      //console.log(poses)
-      //mostrarResumenDatos();
 
       //RECORRER PUNTO POR PUNTO Y PITARLO
       for (let i = 0; i < pose.length; i++) {
@@ -283,7 +302,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
         let y = pose[i].y;
         let name: string = pose[i].name;
         let score = pose[i].score.toFixed(2);
-        if (score > 0.3) {
+        if (score > 0.5) {
           this.pintarPuntosClave(x, y, score, name);
           let conexiones: string[] = this.keypointConnections[name];
           if (conexiones) {
@@ -307,35 +326,27 @@ export class CamaraCaptureComponent implements AfterViewInit {
       }
 
       if (this.estado) {
-        console.log('FILA:', fila);
-
         let predict_data = this.landmarks_to_embedding(fila);
-        //Imprimir los valores de la prediccion
 
-        //predict_data.array().then((array) => {
-        //  console.log(array);
-        //});
+        this.puntaje = this.predecir(predict_data);
+        this.ultimosPuntajes.push(this.puntaje);
+        if (this.ultimosPuntajes.length > 30) {
+          this.ultimosPuntajes.shift();
+          let promedioPuntajes =
+            this.ultimosPuntajes.reduce((a, b) => a + b, 0) /
+            this.ultimosPuntajes.length;
 
-        let puntaje = this.predecir(predict_data);
-        console.log('PUNTAJEe:', puntaje);
-
-        if (puntaje >= 0 && puntaje < 0.5) {
+          promedioPuntajes = Math.round(promedioPuntajes);
+          this.mejorPuntaje = Math.max(this.mejorPuntaje, promedioPuntajes);
+        }
+        console.log('PUNTAJEe:', this.puntaje);
+        if (this.puntaje == 0) {
           this.colorEsqueleto = 'rgb(255, 0, 0)';
-        } else if (puntaje >= 0.5 && puntaje < 1.5) {
+        } else if (this.puntaje == 1) {
           this.colorEsqueleto = 'rgb(255, 255, 0)';
-        } else if (puntaje >= 1.5) {
+        } else if (this.puntaje == 2) {
           this.colorEsqueleto = 'rgb(0, 255, 0)';
         }
-
-        /*
-        if (puntaje == 0) {
-          this.colorEsqueleto = 'rgb(255, 0, 0)';
-        } else if (puntaje == 1) {
-          this.colorEsqueleto = 'rgb(255, 255, 0)';
-        } else if (puntaje == 2) {
-          this.colorEsqueleto = 'rgb(0, 255, 0)';
-        }
-        */
       }
     }
   }
@@ -420,10 +431,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
     const classification = this.poseClassifier.predict(processedInput);
 
     // Obtener la predicción con mejores resultados
-    //const value = classification.argMax(-1).dataSync()[0];
-    // console.log('CLASIFICACION:', value);
-    const value = classification.dataSync()[0];
-    //return value;
+    const value = classification.argMax(-1).dataSync()[0];
     return value;
   }
 

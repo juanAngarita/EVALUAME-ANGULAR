@@ -1,32 +1,26 @@
-<table class="table table-striped">
-    <thead>
-        <th>Intento</th>
-        <th>Puntaje</th>
-    </thead>
-    <tbody *ngIf="escala">
-        <tr>
-            <td>
-                1
-            </td>
-            <td>
-                {{escala.puntajes[0]}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                2
-            </td>
-            <td>
-                {{escala.puntajes[1]}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                3
-            </td>
-            <td>
-                {{escala.puntajes[2]}}
-            </td>
-        </tr>
-    </tbody>
+<table class="table table-striped rounded-3 overflow-hidden">
+  <thead>
+    <th>Intento</th>
+    <th>Puntaje</th>
+  </thead>
+  <tbody *ngIf="escala">
+    <tr>
+      <td>1</td>
+      <td>
+        {{ escala.puntajes[0] }}
+      </td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>
+        {{ escala.puntajes[1] }}
+      </td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>
+        {{ escala.puntajes[2] }}
+      </td>
+    </tr>
+  </tbody>
 </table>

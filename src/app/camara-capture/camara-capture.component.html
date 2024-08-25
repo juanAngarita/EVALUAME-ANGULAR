@@ -12,5 +12,9 @@
   >
     INICIAR EVALUACIÓN
   </button>
+  <p><strong>Puntaje actual:</strong> {{ puntaje }}</p>
+  <p><strong>Alerta:</strong> {{ mensajeAlerta }}</p>
+  <p><strong>Promedio de confianza:</strong> {{ promedioConfianza }}</p>
+  <p><strong>Mejor puntaje:</strong> {{ mejorPuntaje }}</p>
   <app-tabla-intentos [escala]="escala"></app-tabla-intentos>
 </div>
