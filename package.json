@@ -25,6 +25,7 @@
     "@tensorflow/tfjs": "^4.17.0",
     "@tensorflow/tfjs-backend-webgl": "^4.17.0",
     "ame": "file:",
+    "angular-cli-ghpages": "^2.0.1",
     "bootstrap": "^5.2.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
