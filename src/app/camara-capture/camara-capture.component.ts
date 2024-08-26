@@ -10,7 +10,8 @@ import * as tf from '@tensorflow/tfjs';
 import { ConfirmationDialogService } from '../services/confirmation-dialog.service';
 import { Escala } from '../model/Escala';
 import { EscalaService } from '../services/escala.service';
-
+import { DOCUMENT } from '@angular/common';
+import { Inject } from '@angular/core';
 @Component({
   providers: [ConfirmationDialogService],
   selector: 'app-camara-capture',
@@ -125,7 +126,8 @@ export class CamaraCaptureComponent implements AfterViewInit {
   ultimosPuntajes: number[] = [];
   constructor(
     private confirmationDialogService: ConfirmationDialogService,
-    private escalaService: EscalaService
+    private escalaService: EscalaService,
+    @Inject(DOCUMENT) private document: Document
   ) {}
 
   //INICIALIZAR LA ESCALA EN BASE AL ID
@@ -203,9 +205,10 @@ export class CamaraCaptureComponent implements AfterViewInit {
     console.log('Cargando modelo discretos...');
     //Esperar que tensorflow esté listo
     await tf.ready();
+    const baseHref = this.document.getElementsByTagName('base')[0].href;
     //Cargar el modelo
     this.poseClassifier = await tf.loadLayersModel(
-      `/assets/models/${this.id}/model.json`
+      `${baseHref}assets/models/${this.id}/model.json`
     );
     console.log('MODELO RN CARGADO');
   }
