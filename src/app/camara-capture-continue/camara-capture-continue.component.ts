@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  Inject,
   Input,
   ViewChild,
 } from '@angular/core';
@@ -11,6 +12,8 @@ import * as backend from '@tensorflow/tfjs-backend-webgpu';
 import { ConfirmationDialogService } from '../services/confirmation-dialog.service';
 import { Escala } from '../model/Escala';
 import { EscalaService } from '../services/escala.service';
+import { DOCUMENT } from '@angular/common';
+import { KeypointsService } from '../services/keypoints.service';
 @Component({
   selector: 'app-camara-capture-continue',
   templateUrl: './camara-capture-continue.component.html',
@@ -18,78 +21,9 @@ import { EscalaService } from '../services/escala.service';
 })
 export class CamaraCaptureContinueComponent {
   //DICCIONATIO DE PUNTOS CLAVE
-  PUNTOS: { [key: string]: number } = {
-    NOSE: 0,
-    LEFT_EYE_INNER: 1,
-    LEFT_EYE: 2,
-    LEFT_EYE_OUTER: 3,
-    RIGHT_EYE_INNER: 4,
-    RIGHT_EYE: 5,
-    RIGHT_EYE_OUTER: 6,
-    LEFT_EAR: 7,
-    RIGHT_EAR: 8,
-    MOUTH_LEFT: 9,
-    MOUTH_RIGHT: 10,
-    LEFT_SHOULDER: 11,
-    RIGHT_SHOULDER: 12,
-    LEFT_ELBOW: 13,
-    RIGHT_ELBOW: 14,
-    LEFT_WRIST: 15,
-    RIGHT_WRIST: 16,
-    LEFT_PINKY: 17,
-    RIGHT_PINKY: 18,
-    LEFT_INDEX: 19,
-    RIGHT_INDEX: 20,
-    LEFT_THUMB: 21,
-    RIGHT_THUMB: 22,
-    LEFT_HIP: 23,
-    RIGHT_HIP: 24,
-    LEFT_KNEE: 25,
-    RIGHT_KNEE: 26,
-    LEFT_ANKLE: 27,
-    RIGHT_ANKLE: 28,
-    LEFT_HEEL: 29,
-    RIGHT_HEEL: 30,
-    LEFT_FOOT_INDEX: 31,
-    RIGHT_FOOT_INDEX: 32,
-  };
-
+  PUNTOS: { [key: string]: number } = {};
   //DICCIONARIO DE CONEXIONES
-  keypointConnections: { [key: string]: string[] } = {
-    nose: ['left_eye_inner', 'right_eye_inner'],
-    left_eye_inner: ['left_eye', 'left_eye_outer'],
-    right_eye_inner: ['right_eye', 'right_eye_outer'],
-    left_eye: ['left_eye_outer'],
-    right_eye: ['right_eye_outer'],
-    left_eye_outer: ['left_ear'],
-    right_eye_outer: ['right_ear'],
-    left_ear: ['left_shoulder'],
-    right_ear: ['right_shoulder'],
-    mouth_left: ['mouth_right'],
-    mouth_right: [],
-    left_shoulder: ['right_shoulder', 'left_elbow', 'left_hip'],
-    right_shoulder: ['left_shoulder', 'right_elbow', 'right_hip'],
-    left_elbow: ['left_wrist'],
-    right_elbow: ['right_wrist'],
-    left_wrist: ['left_pinky', 'left_index', 'left_thumb'],
-    right_wrist: ['right_pinky', 'right_index', 'right_thumb'],
-    left_pinky: [],
-    right_pinky: [],
-    left_index: [],
-    right_index: [],
-    left_thumb: [],
-    right_thumb: [],
-    left_hip: ['right_hip', 'left_knee'],
-    right_hip: ['left_hip', 'right_knee'],
-    left_knee: ['left_ankle'],
-    right_knee: ['right_ankle'],
-    left_ankle: ['left_heel', 'left_foot_index'],
-    right_ankle: ['right_heel', 'right_foot_index'],
-    left_heel: ['left_foot_index'],
-    right_heel: ['right_foot_index'],
-    left_foot_index: [],
-    right_foot_index: [],
-  };
+  keypointConnections: { [key: string]: string[] } = {};
 
   //Elementos del HTML
   @ViewChild('video') videoElement!: ElementRef;
@@ -116,9 +50,17 @@ export class CamaraCaptureContinueComponent {
   //ESTIMACIÓN DE POSE Y MODELOS
   poseClassifier: any;
 
+  mensajeAlerta: string = '';
+
+  promedioConfianza: number = 0;
+
+  mejorPuntaje: number = 0;
+  ultimosPuntajes: number[] = [];
   constructor(
     private confirmationDialogService: ConfirmationDialogService,
-    private escalaService: EscalaService
+    private escalaService: EscalaService,
+    @Inject(DOCUMENT) private document: Document,
+    private keypointsService: KeypointsService
   ) {}
 
   //INICIALIZAR LA ESCALA EN BASE AL ID
@@ -129,6 +71,8 @@ export class CamaraCaptureContinueComponent {
   ngOnInit() {
     console.log('Funcion ngOnInit');
     this.runPoseEstimation();
+    this.PUNTOS = this.keypointsService.PUNTOS;
+    this.keypointConnections = this.keypointsService.keypointConnections;
   }
 
   //OBTENER LOS ELEMENTOS DEL HTML + INICIALIZAR LA CAMARA
@@ -177,16 +121,18 @@ export class CamaraCaptureContinueComponent {
   //ACTUALIZA EL PUNTAJE TANTO EN EL SERVICIO COMO EN EL FRONT
   actualizarPuntajes() {
     if (this.escala) {
-      this.escalaService.actualizarPuntaje(this.escala.id, this.puntaje);
+      this.escalaService.actualizarPuntaje(this.escala.id, this.mejorPuntaje);
       let intentos = this.escala.intentos;
-      this.escala.puntajes[intentos] = this.puntaje;
+      this.escala.puntajes[intentos] = this.mejorPuntaje;
       this.escala.intentos++;
       //EN CASO DE QUE SE HAYA LLEGADO AL MÁXIMO DE INTENTOS
       if (this.escala.intentos == 3) {
         this.desactivarBoton = true;
-        console.log('apagando boton');
+        console.log('NO HAY MAS INTENTOS DISPONIBLES');
       }
     }
+    this.mejorPuntaje = 0;
+    this.ultimosPuntajes = [];
   }
 
   //CARGAR EL MODELO DE CLASIFIFCACION
@@ -194,9 +140,10 @@ export class CamaraCaptureContinueComponent {
     console.log('Cargando modelo continuo...');
     //Esperar que tensorflow esté listo
     await tf.ready();
+    const baseHref = this.document.getElementsByTagName('base')[0].href;
     //Cargar el modelo
     this.poseClassifier = await tf.loadLayersModel(
-      `/assets/models/continue/${this.id}/model.json`
+      `${baseHref}assets/models/continue/${this.id}/model.json`
     );
     console.log('Modelo de clasificación: ', this.poseClassifier.model);
   }
@@ -260,8 +207,27 @@ export class CamaraCaptureContinueComponent {
       this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
     //RENDERIZADO DE LAS POSES
-    if (this.poses) {
+    if (this.poses && this.poses.length > 0) {
+      let counter: number = 0.0;
+      for (let i = 0; i < this.poses[0].keypoints.length; i++) {
+        counter += Number(this.poses[0].keypoints[i].score.toFixed(2));
+      }
+
+      this.promedioConfianza = counter / this.poses[0].keypoints.length;
+      this.promedioConfianza = Number(this.promedioConfianza.toFixed(2));
       this.drawPoses(this.poses);
+      if (this.promedioConfianza < 0.6) {
+        this.mensajeAlerta =
+          'No se reconoce ninguna pose con confianza suficiente';
+        this.desactivarBoton = true;
+      } else {
+        this.mensajeAlerta = '';
+        this.desactivarBoton = false;
+      }
+    } else {
+      this.mensajeAlerta = 'No se reconocen personas en la escena';
+      this.promedioConfianza = 0.0;
+      this.desactivarBoton = true;
     }
   }
 
@@ -305,35 +271,31 @@ export class CamaraCaptureContinueComponent {
       }
 
       if (this.estado) {
-        console.log('FILA:', fila);
-
         let predict_data = this.landmarks_to_embedding(fila);
-        //Imprimir los valores de la prediccion
 
-        //predict_data.array().then((array) => {
-        //  console.log(array);
-        //});
+        this.puntaje = this.predecir(predict_data);
+        this.ultimosPuntajes.push(this.puntaje);
+        if (this.ultimosPuntajes.length > 30) {
+          this.ultimosPuntajes.shift();
+          let promedioPuntajes =
+            this.ultimosPuntajes.reduce((a, b) => a + b, 0) /
+            this.ultimosPuntajes.length;
 
-        let puntaje = this.predecir(predict_data);
-        console.log('PUNTAJEe:', puntaje);
-
-        if (puntaje >= 0 && puntaje < 0.5) {
-          this.colorEsqueleto = 'rgb(255, 0, 0)';
-        } else if (puntaje >= 0.5 && puntaje < 1.5) {
-          this.colorEsqueleto = 'rgb(255, 255, 0)';
-        } else if (puntaje >= 1.5) {
-          this.colorEsqueleto = 'rgb(0, 255, 0)';
+          promedioPuntajes = Math.round(promedioPuntajes);
+          this.mejorPuntaje = Math.max(this.mejorPuntaje, promedioPuntajes);
         }
 
-        /*
-        if (puntaje == 0) {
+        if (this.puntaje > 2.0) {
+          this.puntaje = 2.0;
+        }
+
+        if (this.puntaje >= 0 && this.puntaje < 0.5) {
           this.colorEsqueleto = 'rgb(255, 0, 0)';
-        } else if (puntaje == 1) {
+        } else if (this.puntaje >= 0.5 && this.puntaje < 1.5) {
           this.colorEsqueleto = 'rgb(255, 255, 0)';
-        } else if (puntaje == 2) {
+        } else if (this.puntaje >= 1.5) {
           this.colorEsqueleto = 'rgb(0, 255, 0)';
         }
-        */
       }
     }
   }

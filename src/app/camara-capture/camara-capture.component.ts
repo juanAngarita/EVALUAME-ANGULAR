@@ -12,6 +12,7 @@ import { Escala } from '../model/Escala';
 import { EscalaService } from '../services/escala.service';
 import { DOCUMENT } from '@angular/common';
 import { Inject } from '@angular/core';
+import { KeypointsService } from '../services/keypoints.service';
 @Component({
   providers: [ConfirmationDialogService],
   selector: 'app-camara-capture',
@@ -20,78 +21,10 @@ import { Inject } from '@angular/core';
 })
 export class CamaraCaptureComponent implements AfterViewInit {
   //DICCIONATIO DE PUNTOS CLAVE
-  PUNTOS: { [key: string]: number } = {
-    NOSE: 0,
-    LEFT_EYE_INNER: 1,
-    LEFT_EYE: 2,
-    LEFT_EYE_OUTER: 3,
-    RIGHT_EYE_INNER: 4,
-    RIGHT_EYE: 5,
-    RIGHT_EYE_OUTER: 6,
-    LEFT_EAR: 7,
-    RIGHT_EAR: 8,
-    MOUTH_LEFT: 9,
-    MOUTH_RIGHT: 10,
-    LEFT_SHOULDER: 11,
-    RIGHT_SHOULDER: 12,
-    LEFT_ELBOW: 13,
-    RIGHT_ELBOW: 14,
-    LEFT_WRIST: 15,
-    RIGHT_WRIST: 16,
-    LEFT_PINKY: 17,
-    RIGHT_PINKY: 18,
-    LEFT_INDEX: 19,
-    RIGHT_INDEX: 20,
-    LEFT_THUMB: 21,
-    RIGHT_THUMB: 22,
-    LEFT_HIP: 23,
-    RIGHT_HIP: 24,
-    LEFT_KNEE: 25,
-    RIGHT_KNEE: 26,
-    LEFT_ANKLE: 27,
-    RIGHT_ANKLE: 28,
-    LEFT_HEEL: 29,
-    RIGHT_HEEL: 30,
-    LEFT_FOOT_INDEX: 31,
-    RIGHT_FOOT_INDEX: 32,
-  };
+  PUNTOS: { [key: string]: number } = {};
 
   //DICCIONARIO DE CONEXIONES
-  keypointConnections: { [key: string]: string[] } = {
-    nose: ['left_eye_inner', 'right_eye_inner'],
-    left_eye_inner: ['left_eye', 'left_eye_outer'],
-    right_eye_inner: ['right_eye', 'right_eye_outer'],
-    left_eye: ['left_eye_outer'],
-    right_eye: ['right_eye_outer'],
-    left_eye_outer: ['left_ear'],
-    right_eye_outer: ['right_ear'],
-    left_ear: ['left_shoulder'],
-    right_ear: ['right_shoulder'],
-    mouth_left: ['mouth_right'],
-    mouth_right: [],
-    left_shoulder: ['right_shoulder', 'left_elbow', 'left_hip'],
-    right_shoulder: ['left_shoulder', 'right_elbow', 'right_hip'],
-    left_elbow: ['left_wrist'],
-    right_elbow: ['right_wrist'],
-    left_wrist: ['left_pinky', 'left_index', 'left_thumb'],
-    right_wrist: ['right_pinky', 'right_index', 'right_thumb'],
-    left_pinky: [],
-    right_pinky: [],
-    left_index: [],
-    right_index: [],
-    left_thumb: [],
-    right_thumb: [],
-    left_hip: ['right_hip', 'left_knee'],
-    right_hip: ['left_hip', 'right_knee'],
-    left_knee: ['left_ankle'],
-    right_knee: ['right_ankle'],
-    left_ankle: ['left_heel', 'left_foot_index'],
-    right_ankle: ['right_heel', 'right_foot_index'],
-    left_heel: ['left_foot_index'],
-    right_heel: ['right_foot_index'],
-    left_foot_index: [],
-    right_foot_index: [],
-  };
+  keypointConnections: { [key: string]: string[] } = {};
 
   //Elementos del HTML
   @ViewChild('video') videoElement!: ElementRef;
@@ -127,12 +60,15 @@ export class CamaraCaptureComponent implements AfterViewInit {
   constructor(
     private confirmationDialogService: ConfirmationDialogService,
     private escalaService: EscalaService,
-    @Inject(DOCUMENT) private document: Document
+    @Inject(DOCUMENT) private document: Document,
+    private keypointsService: KeypointsService
   ) {}
 
   //INICIALIZAR LA ESCALA EN BASE AL ID
   ngOnChanges() {
     this.escala = this.escalaService.findById(this.id);
+    this.PUNTOS = this.keypointsService.PUNTOS;
+    this.keypointConnections = this.keypointsService.keypointConnections;
   }
 
   ngOnInit() {
@@ -282,12 +218,15 @@ export class CamaraCaptureComponent implements AfterViewInit {
       if (this.promedioConfianza < 0.6) {
         this.mensajeAlerta =
           'No se reconoce ninguna pose con confianza suficiente';
+        this.desactivarBoton = true;
       } else {
         this.mensajeAlerta = '';
+        this.desactivarBoton = false;
       }
     } else {
       this.mensajeAlerta = 'No se reconocen personas en la escena';
       this.promedioConfianza = 0.0;
+      this.desactivarBoton = true;
     }
   }
 

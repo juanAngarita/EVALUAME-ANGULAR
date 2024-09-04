@@ -15,6 +15,7 @@ import { CamaraCaptureContinueComponent } from './camara-capture-continue/camara
 
 import { FormsModule } from '@angular/forms';
 import { ConfirmationDialogService } from './services/confirmation-dialog.service';
+import { FooterComponent } from './layout/footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { ConfirmationDialogService } from './services/confirmation-dialog.servic
     ConfirmationDialogComponent,
     TablaIntentosComponent,
     CamaraCaptureContinueComponent,
+    FooterComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, NgbModule, FormsModule],
   providers: [ConfirmationDialogService],
