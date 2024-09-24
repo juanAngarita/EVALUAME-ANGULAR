@@ -22,24 +22,23 @@ import { KeypointsService } from '../services/keypoints.service';
 export class CamaraCaptureComponent implements AfterViewInit {
   //DICCIONATIO DE PUNTOS CLAVE
   PUNTOS: { [key: string]: number } = {};
-
   //DICCIONARIO DE CONEXIONES
   keypointConnections: { [key: string]: string[] } = {};
 
   //Elementos del HTML
   @ViewChild('video') videoElement!: ElementRef;
   @ViewChild('canvas') canvasElement!: ElementRef;
-
-  //INPUT -> ID DEL ÍTEM
-  @Input()
-  id: number = 0;
-  //objeto con la información de la escala
-  escala: Escala | null = null;
-
   //Elementos para la captura de movimiento
   video: HTMLVideoElement | null = null;
   canvas!: HTMLCanvasElement;
   ctx!: CanvasRenderingContext2D;
+
+  //INPUT -> ID DEL ÍTEM
+  @Input()
+  id: number = 0;
+
+  //objeto con la información de la escala
+  escala: Escala | null = null;
 
   //ELEMENTOS ESTIMACIÓN DE POSE
   estado: boolean = false; //SI SE ESTÁ GRABANDO
@@ -55,8 +54,18 @@ export class CamaraCaptureComponent implements AfterViewInit {
 
   promedioConfianza: number = 0;
 
+  //Mejor puntaje durante el intento actual
   mejorPuntaje: number = 0;
+  //Lista la cual va a contener máximo 90 puntajes es decir 3 segundos de grabacion
   ultimosPuntajes: number[] = [];
+
+  colors: { [key: string]: string } = {
+    white: 'rgb(255, 255, 255)',
+    red: 'rgb(255, 0, 0)',
+    yellow: 'rgb(255, 255, 0)',
+    green: 'rgb(0, 255, 0)',
+  };
+
   constructor(
     private confirmationDialogService: ConfirmationDialogService,
     private escalaService: EscalaService,
@@ -66,14 +75,19 @@ export class CamaraCaptureComponent implements AfterViewInit {
 
   //INICIALIZAR LA ESCALA EN BASE AL ID
   ngOnChanges() {
+    //Se busca la escala y se cargan datos adicionales
     this.escala = this.escalaService.findById(this.id);
     this.PUNTOS = this.keypointsService.PUNTOS;
     this.keypointConnections = this.keypointsService.keypointConnections;
   }
 
   ngOnInit() {
-    console.log('Funcion ngOnInit');
+    //Carga del modelo de Pose
     this.runPoseEstimation();
+    //Si ya se tienen 3 intentos no se permite activar el boton
+    if (this.escala!.intentos >= 3) {
+      this.desactivarBoton = true;
+    }
   }
 
   //OBTENER LOS ELEMENTOS DEL HTML + INICIALIZAR LA CAMARA
@@ -89,16 +103,18 @@ export class CamaraCaptureComponent implements AfterViewInit {
     this.cargarModel();
   }
 
-  //BOTON DE "INICIAR EVALUACIÓN"
+  //OnClick del boton de grabacion
   cambiarEstado(element: any) {
     let button = element;
+    //Cambiamos el estado del botón
     this.estado = !this.estado;
     if (this.estado == true) {
       button.textContent = 'GRABANDO';
     } else {
+      //En caso de que se pare de grabar se muestra el popup
       this.openConfirmationDialog();
       button.textContent = 'INICIAR EVALUACIÓN';
-      this.colorEsqueleto = 'rgb(255, 255, 255)';
+      this.colorEsqueleto = this.colors['white'];
     }
   }
 
@@ -123,11 +139,8 @@ export class CamaraCaptureComponent implements AfterViewInit {
   actualizarPuntajes() {
     if (this.escala) {
       this.escalaService.actualizarPuntaje(this.escala.id, this.mejorPuntaje);
-      let intentos = this.escala.intentos;
-      this.escala.puntajes[intentos] = this.mejorPuntaje;
-      this.escala.intentos++;
       //EN CASO DE QUE SE HAYA LLEGADO AL MÁXIMO DE INTENTOS
-      if (this.escala.intentos == 3) {
+      if (this.escala.intentos >= 3) {
         this.desactivarBoton = true;
         console.log('NO HAY MAS INTENTOS DISPONIBLES');
       }
@@ -219,7 +232,7 @@ export class CamaraCaptureComponent implements AfterViewInit {
         this.mensajeAlerta =
           'No se reconoce ninguna pose con confianza suficiente';
         this.desactivarBoton = true;
-      } else {
+      } else if (this.escala!.intentos < 3) {
         this.mensajeAlerta = '';
         this.desactivarBoton = false;
       }
@@ -283,11 +296,11 @@ export class CamaraCaptureComponent implements AfterViewInit {
         }
         console.log('PUNTAJEe:', this.puntaje);
         if (this.puntaje == 0) {
-          this.colorEsqueleto = 'rgb(255, 0, 0)';
+          this.colorEsqueleto = this.colors['red'];
         } else if (this.puntaje == 1) {
-          this.colorEsqueleto = 'rgb(255, 255, 0)';
+          this.colorEsqueleto = this.colors['yellow'];
         } else if (this.puntaje == 2) {
-          this.colorEsqueleto = 'rgb(0, 255, 0)';
+          this.colorEsqueleto = this.colors['green'];
         }
       }
     }
