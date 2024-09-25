@@ -1,50 +1,17 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  Inject,
-  Input,
-  ViewChild,
-} from '@angular/core';
+import { Component } from '@angular/core';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import * as tf from '@tensorflow/tfjs';
-import * as backend from '@tensorflow/tfjs-backend-webgpu';
-import { ConfirmationDialogService } from '../services/confirmation-dialog.service';
-import { Escala } from '../model/Escala';
-import { EscalaService } from '../services/escala.service';
-import { DOCUMENT } from '@angular/common';
-import { KeypointsService } from '../services/keypoints.service';
+import { CaptureComponent } from '../capture/capture.component';
 @Component({
   selector: 'app-camara-capture-continue',
   templateUrl: './camara-capture-continue.component.html',
   styleUrls: ['./camara-capture-continue.component.css'],
 })
-export class CamaraCaptureContinueComponent {
-  //DICCIONATIO DE PUNTOS CLAVE
-  PUNTOS: { [key: string]: number } = {};
-  //DICCIONARIO DE CONEXIONES
-  keypointConnections: { [key: string]: string[] } = {};
-
-  //Elementos del HTML
-  @ViewChild('video') videoElement!: ElementRef;
-  @ViewChild('canvas') canvasElement!: ElementRef;
-
-  //INPUT -> ID DEL ÍTEM
-  @Input()
-  id: number = 0;
-  //objeto con la información de la escala
-  escala: Escala | null = null;
-
-  //Elementos para la captura de movimiento
-  video: HTMLVideoElement | null = null;
-  canvas!: HTMLCanvasElement;
-  ctx!: CanvasRenderingContext2D;
-
+export class CamaraCaptureContinueComponent extends CaptureComponent {
   //ELEMENTOS ESTIMACIÓN DE POSE
   estado: boolean = false; //SI SE ESTÁ GRABANDO
   poses: any;
   puntaje: number = 0;
-  desactivarBoton: boolean = false;
   colorEsqueleto: string = 'rgb(255, 255, 255)';
 
   //ESTIMACIÓN DE POSE Y MODELOS
@@ -56,37 +23,6 @@ export class CamaraCaptureContinueComponent {
 
   mejorPuntaje: number = 0;
   ultimosPuntajes: number[] = [];
-  constructor(
-    private confirmationDialogService: ConfirmationDialogService,
-    private escalaService: EscalaService,
-    @Inject(DOCUMENT) private document: Document,
-    private keypointsService: KeypointsService
-  ) {}
-
-  //INICIALIZAR LA ESCALA EN BASE AL ID
-  ngOnChanges() {
-    this.escala = this.escalaService.findById(this.id);
-  }
-
-  ngOnInit() {
-    console.log('Funcion ngOnInit');
-    this.runPoseEstimation();
-    this.PUNTOS = this.keypointsService.PUNTOS;
-    this.keypointConnections = this.keypointsService.keypointConnections;
-  }
-
-  //OBTENER LOS ELEMENTOS DEL HTML + INICIALIZAR LA CAMARA
-  ngAfterViewInit() {
-    this.video = this.videoElement.nativeElement;
-    this.video!.width = 640;
-    this.video!.height = 480;
-    this.canvas = this.canvasElement.nativeElement;
-    this.ctx = this.canvas.getContext('2d')!;
-    //Inicializar la camata
-    this.initCamera();
-    //Inicializar el modelo de clasificación
-    this.cargarModel();
-  }
 
   //BOTON DE "INICIAR EVALUACIÓN"
   cambiarEstado(element: any) {
@@ -271,7 +207,7 @@ export class CamaraCaptureContinueComponent {
       }
 
       if (this.estado) {
-        let predict_data = this.landmarks_to_embedding(fila);
+        let predict_data = this.normalizeService.landmarks_to_embedding(fila);
 
         this.puntaje = this.predecir(predict_data);
         this.ultimosPuntajes.push(this.puntaje);
@@ -300,81 +236,6 @@ export class CamaraCaptureContinueComponent {
     }
   }
 
-  //PROCESAMIENTO DE DATOS
-  get_center_point(
-    landmarks: any,
-    left_bodypart: number,
-    right_bodypart: number
-  ) {
-    let left = tf.gather(landmarks, left_bodypart, 1);
-    let right = tf.gather(landmarks, right_bodypart, 1);
-    const center = tf.add(tf.mul(left, 0.5), tf.mul(right, 0.5));
-    return center;
-  }
-
-  get_pose_size(landmarks: any, torso_size_multiplier = 2.5) {
-    let hips_center = this.get_center_point(
-      landmarks,
-      this.PUNTOS['LEFT_HIP'],
-      this.PUNTOS['RIGHT_HIP']
-    );
-    let shoulders_center = this.get_center_point(
-      landmarks,
-      this.PUNTOS['LEFT_SHOULDER'],
-      this.PUNTOS['RIGHT_SHOULDER']
-    );
-    let torso_size = tf.norm(tf.sub(shoulders_center, hips_center));
-    let pose_center_new = this.get_center_point(
-      landmarks,
-      this.PUNTOS['LEFT_HIP'],
-      this.PUNTOS['RIGHT_HIP']
-    );
-    pose_center_new = tf.expandDims(pose_center_new, 1);
-
-    pose_center_new = tf.broadcastTo(pose_center_new, [1, 33, 2]);
-    // return: shape(17,2)
-    let d = tf.gather(tf.sub(landmarks, pose_center_new), 0, 0);
-    let max_dist = tf.max(tf.norm(d, 'euclidean', 0));
-
-    // normalize scale
-    let pose_size = tf.maximum(
-      tf.mul(torso_size, torso_size_multiplier),
-      max_dist
-    );
-    return pose_size;
-  }
-
-  normalize_pose_landmarks(landmarks: any) {
-    let pose_center = this.get_center_point(
-      landmarks,
-      this.PUNTOS['LEFT_HIP'],
-      this.PUNTOS['RIGHT_HIP']
-    );
-
-    pose_center = tf.expandDims(pose_center, 1);
-
-    pose_center = tf.broadcastTo(pose_center, [1, 33, 2]);
-
-    landmarks = tf.sub(landmarks, pose_center);
-
-    let pose_size = this.get_pose_size(landmarks);
-    landmarks = tf.div(landmarks, pose_size);
-
-    landmarks.array().then((array: any[]) => {
-      console.log('Nuevo:', array);
-    });
-    return landmarks;
-  }
-
-  landmarks_to_embedding(landmarks: any) {
-    // normalize landmarks 2D
-    landmarks = this.normalize_pose_landmarks(tf.expandDims(landmarks, 0));
-    let embedding = tf.reshape(landmarks, [1, 66]);
-    return embedding;
-  }
-  //////////
-  //FIN PROCESAMIENTO DE DATOS
-
   //Predecir a partir de un conjunto de entrada
   predecir(processedInput: any): number {
     const classification = this.poseClassifier.predict(processedInput);
@@ -385,38 +246,5 @@ export class CamaraCaptureContinueComponent {
     const value = classification.dataSync()[0];
     //return value;
     return value;
-  }
-
-  //PINTA 1 PUNTO CLAVE
-  pintarPuntosClave(x: number, y: number, score: number, name: string) {
-    let mirroredX = this.canvas.width - x;
-
-    // Dibujar el punto clave como un círculo
-    this.ctx.beginPath();
-    this.ctx.fillStyle = 'rgb(255, 0, 0)';
-    this.ctx.arc(mirroredX, y, 5, 0, Math.PI * 2);
-    this.ctx.fill();
-
-    // Dibujar el nombre y la puntuación cerca del punto clave
-    //this.ctx.fillStyle = 'rgb(0, 255, 0)';
-    //this.ctx.fillText(name, mirroredX, y - 10);
-    //this.ctx.fillText(score.toString(), mirroredX, y + 15);
-  }
-
-  //DIBUJAR SEGMENTO DE LINEA
-  drawSegment(
-    [mx, my]: [number, number],
-    [tx, ty]: [number, number],
-    color: string
-  ) {
-    let mirroredmX = this.canvas.width - mx;
-    let mirroredtX = this.canvas.width - tx;
-
-    this.ctx.beginPath();
-    this.ctx.moveTo(mirroredmX, my);
-    this.ctx.lineTo(mirroredtX, ty);
-    this.ctx.lineWidth = 5;
-    this.ctx.strokeStyle = color;
-    this.ctx.stroke();
   }
 }

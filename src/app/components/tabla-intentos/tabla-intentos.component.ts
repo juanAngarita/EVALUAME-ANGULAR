@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { input } from '@tensorflow/tfjs';
-import { Escala } from '../model/Escala';
+import { Escala } from '../../model/Escala';
 
 @Component({
   selector: 'app-tabla-intentos',
@@ -9,7 +9,7 @@ import { Escala } from '../model/Escala';
 })
 export class TablaIntentosComponent {
   @Input()
-  escala: Escala | null = null;
+  escala!: Escala;
 
   ngOnChanges() {}
 }
