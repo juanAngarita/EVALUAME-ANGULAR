@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { Escala } from '../model/Escala';
-import { EscalaService } from '../services/escala.service';
 import { Router } from '@angular/router';
+import { Escala } from 'src/app/model/Escala';
+import { EscalaService } from 'src/app/services/escala.service';
 
 @Component({
   selector: 'app-home',
@@ -25,6 +25,7 @@ export class HomeComponent {
   escalas: Escala[] = [];
   ngOnInit() {
     this.escalas = this.escalaService.findAll();
+    console.log(this.escalas);
   }
 
   seleccionar(id: number) {

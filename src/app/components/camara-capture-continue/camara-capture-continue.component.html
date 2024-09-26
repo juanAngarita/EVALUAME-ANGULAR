@@ -4,13 +4,15 @@
   <video #video playsinline autoplay hidden></video>
 
   <button
-    [disabled]="desactivarBoton"
+    [disabled]="btn_activated"
     type="button"
     class="btn btn-primary"
     (click)="cambiarEstado($event.target)"
   >
     INICIAR EVALUACIÓN
   </button>
-
+  <p><strong>Puntaje actual:</strong> {{ puntaje | number : "1.2-2" }}</p>
+  <p><strong>Alerta:</strong> {{ mensajeAlerta }}</p>
+  <p><strong>Promedio de confianza:</strong> {{ promedioConfianza }}</p>
   <app-tabla-intentos [escala]="escala"></app-tabla-intentos>
 </div>

@@ -1,6 +1,31 @@
 /* You can add global styles to this file, and also import other style files */
-html, body{
-    padding: 0;
-    margin: 0;
-    height: 100%;
+html,
+body,
+app-root {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+app-home,
+app-evaluar {
+  flex-grow: 1;
+}
+app-root {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.back-blue {
+  background-color: #2a5392;
+  color: white;
 }

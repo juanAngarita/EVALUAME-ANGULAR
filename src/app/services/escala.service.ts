@@ -95,6 +95,24 @@ export class EscalaService {
       },
       puntajes: [0, 0, 0],
     },
+    {
+      id: 16,
+      posicionInicial:
+        'Brazos a lo largo del cuerpo o más allá del apoya brazos.',
+      descripcion: '16. PONER LOS DOS BRAZOS POR ENCIMA DE LA CABEZA',
+      intentos: 0,
+      puntajeMaximo: 0,
+      detalles: {
+        puntaje0: 'Incapaz.',
+        puntaje1:
+          'Puede levantar ambos brazos simultáneamente porencima de la cabeza solo si ﬂexiona el codo (usando compensación).',
+        puntaje2:
+          'Puede abducir ambos brazos simultáneamente con el codo en extensión formando un círculo completo hasta que se tocan encima de la cabeza.(Brooke 6).',
+        instrucciones:
+          'Levanta los brazos por encima de la cabeza hacia los lados intenta mantener los codos rectos',
+      },
+      puntajes: [0, 0, 0],
+    },
   ];
 
   findAll() {
@@ -107,8 +125,13 @@ export class EscalaService {
   }
 
   actualizarPuntaje(idEscala: number, puntaje: number) {
-    let intentos = this.escalas[idEscala].intentos;
-    this.escalas[idEscala].puntajes[intentos] = puntaje;
-    this.escalas[idEscala].intentos++;
+    let escala = this.findById(idEscala);
+    let intentos = escala.intentos;
+    escala.puntajes[intentos] = puntaje;
+    escala.intentos++;
+
+    if (puntaje > escala.puntajeMaximo) {
+      escala.puntajeMaximo = puntaje;
+    }
   }
 }
