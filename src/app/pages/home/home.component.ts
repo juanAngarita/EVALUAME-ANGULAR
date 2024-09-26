@@ -25,6 +25,7 @@ export class HomeComponent {
   escalas: Escala[] = [];
   ngOnInit() {
     this.escalas = this.escalaService.findAll();
+    console.log(this.escalas);
   }
 
   seleccionar(id: number) {

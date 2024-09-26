@@ -129,5 +129,9 @@ export class EscalaService {
     let intentos = escala.intentos;
     escala.puntajes[intentos] = puntaje;
     escala.intentos++;
+
+    if (puntaje > escala.puntajeMaximo) {
+      escala.puntajeMaximo = puntaje;
+    }
   }
 }
