@@ -159,14 +159,14 @@ export abstract class CaptureComponent {
         let y = pose[i].y;
         let name: string = pose[i].name;
         let score = pose[i].score.toFixed(2);
-        if (score > 0.3) {
+        if (score > 0.1) {
           this.pintarPuntosClave(x, y, score, name);
           let conexiones: string[] =
             this.keypointsService.keypointConnections[name];
           if (conexiones) {
             for (let conexion of conexiones) {
               let conName = conexion.toUpperCase();
-              if (pose[this.keypointsService.PUNTOS[conName]].score > 0.3) {
+              if (pose[this.keypointsService.PUNTOS[conName]].score > 0.1) {
                 this.drawSegment(
                   [x, y],
                   [
